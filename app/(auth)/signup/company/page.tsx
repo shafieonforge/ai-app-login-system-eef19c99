@@ -37,17 +37,23 @@ export default function CompanySignupPage() {
     setLoading(true);
 
     try {
+      // 1) Create Supabase auth user
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: adminEmail,
         password,
       });
 
       if (signUpError || !data.user) {
-        setError(signUpError?.message ?? 'Failed to create admin user');
+        setError(
+          `Auth sign-up failed: ${
+            signUpError?.message ?? 'No user returned from Supabase'
+          }`,
+        );
         setLoading(false);
         return;
       }
 
+      // 2) Call onboarding API to create company + app-level user
       const response = await fetch('/api/onboarding/company-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,12 +69,18 @@ export default function CompanySignupPage() {
       });
 
       if (!response.ok) {
-        const body = (await response.json().catch(() => null)) as
-          | { error?: string }
-          | null;
+        let bodyText = '';
+        try {
+          const body = (await response.json()) as { error?: string } | null;
+          bodyText = body?.error ?? '';
+        } catch {
+          // best effort only
+        }
+
         setError(
-          body?.error ??
-            'Failed to complete company onboarding. Please try again.',
+          bodyText
+            ? `Onboarding failed: ${bodyText}`
+            : `Onboarding failed with status ${response.status}`,
         );
         setLoading(false);
         return;
@@ -76,7 +88,11 @@ export default function CompanySignupPage() {
 
       router.replace('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected error');
+      setError(
+        err instanceof Error
+          ? `Unexpected error: ${err.message}`
+          : 'Unexpected error',
+      );
       setLoading(false);
     }
   };

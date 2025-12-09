@@ -13,7 +13,18 @@ interface SignupBody {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const body = (await req.json()) as SignupBody;
+    const raw = await req.text();
+    let body: SignupBody;
+
+    try {
+      body = JSON.parse(raw) as SignupBody;
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid JSON payload' },
+        { status: 400 },
+      );
+    }
+
     const {
       companyName,
       companyEmail,
@@ -33,13 +44,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       !authUserId
     ) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields in onboarding payload' },
         { status: 400 },
       );
     }
 
     const supabase = createClient();
 
+    // Insert company
     const { data: company, error: companyError } = await supabase
       .from('companies')
       .insert({
@@ -52,11 +64,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (companyError || !company) {
       return NextResponse.json(
-        { error: companyError?.message ?? 'Failed to create company' },
+        {
+          error: `Failed to create company: ${
+            companyError?.message ?? 'No company returned'
+          }`,
+        },
         { status: 500 },
       );
     }
 
+    // Insert app-level admin user
     const { error: userError } = await supabase.from('users').insert({
       company_id: company.id,
       first_name: firstName,
@@ -68,15 +85,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (userError) {
       return NextResponse.json(
-        { error: userError.message },
+        {
+          error: `Failed to create app user: ${userError.message}`,
+        },
         { status: 500 },
       );
     }
 
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch {
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : 'Failed to complete onboarding';
+
     return NextResponse.json(
-      { error: 'Failed to complete onboarding' },
+      { error: `Onboarding route error: ${message}` },
       { status: 500 },
     );
   }
