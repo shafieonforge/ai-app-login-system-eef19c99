@@ -1,16 +1,23 @@
-import type { FC } from 'react';
+2. Open `http://localhost:3000/signup/company` in the browser.
 
-const Component: FC = () => {
-  return (
-    <main className="flex min-h-[calc(100vh-56px)] items-center justify-center px-4">
-      <div className="rounded-xl bg-white p-6 shadow-sm">
-        <p className="text-sm text-slate-700">
-          This component is unused. Navigate to <code>/</code>, <code>/login</code>, or{' '}
-          <code>/signup/company</code>.
-        </p>
-      </div>
-    </main>
-  );
-};
+3. Check **browser devtools**:
+   - Open DevTools → Console.
+   - Reload the page.
+   - If there is any red error, tell me the exact text.
 
-export default Component;
+4. Try clicking “Create company account” with **valid** data.
+   - Does the button change to “Creating workspace…”?
+   - Does the red error text appear under the form?
+   - Does the network request `/api/onboarding/company-signup` show up in the Network tab?
+
+If the page itself is blank / not loading:
+
+- Make sure there are **no build errors** in the terminal where `npm run dev` is running.
+- Look for TypeScript/Next errors like “ReferenceError” or “cannot find module”.
+- Paste the exact error line(s) here.
+
+---
+
+## 2. Check Supabase client initialization (most common cause)
+
+Your client setup:
