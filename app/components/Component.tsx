@@ -1,23 +1,26 @@
-2. Open `http://localhost:3000/signup/company` in the browser.
+'use client';
 
-3. Check **browser devtools**:
-   - Open DevTools → Console.
-   - Reload the page.
-   - If there is any red error, tell me the exact text.
+import Link from 'next/link';
 
-4. Try clicking “Create company account” with **valid** data.
-   - Does the button change to “Creating workspace…”?
-   - Does the red error text appear under the form?
-   - Does the network request `/api/onboarding/company-signup` show up in the Network tab?
-
-If the page itself is blank / not loading:
-
-- Make sure there are **no build errors** in the terminal where `npm run dev` is running.
-- Look for TypeScript/Next errors like “ReferenceError” or “cannot find module”.
-- Paste the exact error line(s) here.
-
----
-
-## 2. Check Supabase client initialization (most common cause)
-
-Your client setup:
+export default function Component() {
+  return (
+    <main className="flex min-h-[calc(100vh-56px)] items-center justify-center px-4">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-sm">
+        <h1 className="mb-2 text-center text-2xl font-semibold tracking-tight text-slate-900">
+          Welcome
+        </h1>
+        <p className="mb-6 text-center text-sm text-slate-600">
+          This is a placeholder home page. Use the link below to create a company account.
+        </p>
+        <div className="flex justify-center">
+          <Link
+            href="/signup/company"
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
+          >
+            Go to company signup
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
